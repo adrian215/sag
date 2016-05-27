@@ -4,17 +4,17 @@ import akka.actor.{Actor, DeadLetter}
 import akka.actor.Actor.Receive
 import com.sun.xml.internal.stream.Entity.ScannedEntity
 import pl.edu.pw.elka.sag.actors.messages.Messages.PrepareTweetInstance
-import pl.edu.pw.elka.sag.tweets.Sentiment
+import pl.edu.pw.elka.sag.tweets.{NEGATIVE, POSITIVE, Sentiment}
 import weka.core.{Attribute, DenseInstance}
 
 class PrepareTweetInstanceActor extends Actor{
   override def receive: Receive = {
-    case PrepareTweetInstance(sentiment, text, att) => {
-      val cols = text.split(",").map(_.trim)
+    case PrepareTweetInstance(todelete, text, att) => {
+      val columns = text.split(",").map(_.trim)
 
-      if(cols.length == 5) {
-        val label = convertSentiment()
-        val tweetText = getTweetText(cols(4))
+      if(columns.length == 5) {
+        val sentiment = convertSentiment(columns(3))
+        val tweetText = getTweetText(columns(4))
 
         if(tweetText != null) {
           sender ! Some(prepareInstance(sentiment, tweetText, att))
@@ -44,14 +44,17 @@ class PrepareTweetInstanceActor extends Actor{
     text
   }
 
-  def convertSentiment() : Int = {
-    0
+  def convertSentiment(oldLabel: String) : Sentiment = {
+    oldLabel match {
+      case ":(" => return NEGATIVE
+      case ":)" => return POSITIVE
+    }
   }
 
   def prepareInstance(sentiment: Sentiment, tweetText: String, attribute: Attribute): DenseInstance = {
     val instanceValue: Array[Double] = new Array[Double](2)
     instanceValue(0) = attribute.addStringValue(tweetText)
-    instanceValue(1) = 0
+    instanceValue(1) = sentiment.value
     new DenseInstance(1.0, instanceValue)
   }
 }
