@@ -1,8 +1,6 @@
 package pl.edu.pw.elka.sag.actors
 
-import akka.actor.{Actor, DeadLetter}
-import akka.actor.Actor.Receive
-import com.sun.xml.internal.stream.Entity.ScannedEntity
+import akka.actor.Actor
 import pl.edu.pw.elka.sag.actors.messages.Messages.PrepareTweetInstance
 import pl.edu.pw.elka.sag.tweets.{NEGATIVE, POSITIVE, Sentiment}
 import weka.core.{Attribute, DenseInstance}
@@ -17,10 +15,10 @@ class PrepareTweetInstanceActor extends Actor{
         val tweetText = getTweetText(columns(4))
 
         if(tweetText != null) {
+          println(s"Actor $this.name finished successful")
           sender ! Some(prepareInstance(sentiment, tweetText, att))
         }
       }
-
 
 
       sender ! None

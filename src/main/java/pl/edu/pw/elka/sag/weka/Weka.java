@@ -55,7 +55,9 @@ public class Weka {
         }
 
         Evaluation eval = new Evaluation(data);
-        eval.crossValidateModel(classifier, data, 10, new Random(1));
+        eval.crossValidateModel(classifier, data, 10, new Random());
+        System.out.println("Instances: " + data.size());
+        System.out.println("Efficiency: " + eval.pctCorrect());
         return classifier;
     }
 
