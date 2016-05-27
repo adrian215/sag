@@ -9,7 +9,7 @@ package object tweets {
     override val value: Int = 1
   }
 
-  case object NEGATIVE extends Sentiment(0) {
+  case object NEGATIVE extends Sentiment {
     override val value: Int = 0
   }
 }

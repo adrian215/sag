@@ -17,7 +17,7 @@ class PrepareTweetInstanceActor extends Actor{
         val tweetText = getTweetText(cols(4))
 
         if(tweetText != null) {
-          sender ! prepareInstance(sentiment, tweetText, att)
+          sender ! Some(prepareInstance(sentiment, tweetText, att))
         }
       }
 
