@@ -1,7 +1,7 @@
 package pl.edu.pw.elka.sag.classification.setup
 
 import pl.edu.pw.elka.sag.config.WekaConfig
-import pl.edu.pw.elka.sag.utils.TweetConversion.toTweetText
+import pl.edu.pw.elka.sag.utils.TweetConversion.{TweetTextToString, toTweetText}
 import pl.edu.pw.elka.sag.{NEGATIVE, POSITIVE, Sentiment}
 import weka.core.{Attribute, DenseInstance}
 
@@ -35,12 +35,11 @@ class DenseInstanceBuilder {
     }
   }
 
-  private[DenseInstanceBuilder] def getTweetText(rawText: String): String = {
-    rawText
+  private[DenseInstanceBuilder] def getTweetText(tweetText: String): String = {
+    tweetText
       .removeUrl()
       .removePerson()
       .removeHashtag()
-      .toString()
   }
 
   private[DenseInstanceBuilder] def createDenseInstance(sentiment: Sentiment, tweetText: String, attribute: Attribute): DenseInstance = {

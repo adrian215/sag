@@ -12,14 +12,8 @@ class PrepareTweetInstanceActor extends Actor {
     case PrepareTweetInstance(text, att) => {
 
       val instance = denseInstanceBuilder.buildDenseInstance(text, att)
-      instance match {
-        case Some(instance) =>
-          println(s"Actor $this.name finished successful")
-          sender ! TweetInstanceCreated(instance)
-        case None =>
-          println(s"Actor $this.name failed")
-          sender ! CannotCreateTweetInstance
-      }
+      val message = instance map (TweetInstanceCreated(_)) getOrElse CannotCreateTweetInstance
+      sender ! message
     }
   }
 }

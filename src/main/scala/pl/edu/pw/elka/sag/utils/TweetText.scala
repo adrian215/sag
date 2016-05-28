@@ -18,5 +18,5 @@ class TweetText(val text: String) {
     new TweetText(newText)
   }
 
-  implicit override def toString: String = text
+  override def toString: String = text
 }
