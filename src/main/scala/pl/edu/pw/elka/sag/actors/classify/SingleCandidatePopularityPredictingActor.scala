@@ -6,6 +6,7 @@ import pl.edu.pw.elka.sag.actors.classify.Messages.PredictCandidate
 import pl.edu.pw.elka.sag.classification.setup.DenseInstanceBuilder
 import pl.edu.pw.elka.sag.weka.Weka
 import weka.classifiers.Classifier
+import weka.core.DenseInstance
 import weka.filters.Filter
 
 class SingleCandidatePopularityPredictingActor extends MasterActor {
@@ -21,11 +22,14 @@ class SingleCandidatePopularityPredictingActor extends MasterActor {
       val tweets = io.Source.fromFile(file)
       tweets.getLines().foreach(tweet => {
         val instances = weka.prepareInstances()
-        val instance = dib.buildDenseInstanceFromColumns(instances.attribute(0), dib.getColumnsFromText(tweet))
-        instances.add(instance)
-        val filteredInstances = weka.filter(instances, filter)
-        val result: Double = classifier.classifyInstance(filteredInstances.get(0))
-        println(s"Wynik: $result dla $tweet")
+//        val instance = dib.buildDenseInstanceFromColumns(instances.attribute(0), dib.getColumnsFromText(tweet))
+        val instance: Option[DenseInstance] = dib.buildDenseInstance(tweet, instances.attribute((0)))
+        instance.foreach(instance => {
+          instances.add(instance)
+          val filteredInstances = weka.filter(instances, filter)
+          val result: Double = classifier.classifyInstance(filteredInstances.get(0))
+          println(s"Wynik: $result dla $tweet")
+        })
       })
       tweets.close()
   }
