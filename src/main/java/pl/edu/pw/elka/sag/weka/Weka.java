@@ -10,6 +10,8 @@ import weka.core.tokenizers.AlphabeticTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
+import java.io.BufferedOutputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -72,10 +74,6 @@ public class Weka {
         return classifier;
     }
 
-    public void saveModel(String filePath, Classifier classifier) throws Exception {
-        SerializationHelper.write(filePath, classifier);
-    }
-
     private Classifier getSVM() {
         LibSVM classifier = new LibSVM();
         classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_NU_SVC, LibSVM.TAGS_SVMTYPE));
@@ -86,9 +84,5 @@ public class Weka {
     private Classifier getNaiveBayes() {
         NaiveBayes classifier = new NaiveBayes();
         return classifier;
-    }
-
-    private double predict(Classifier classifier, Instance instance) throws Exception {
-        return classifier.classifyInstance(instance);
     }
 }
