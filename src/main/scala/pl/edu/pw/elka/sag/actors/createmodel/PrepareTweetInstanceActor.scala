@@ -3,6 +3,7 @@ package pl.edu.pw.elka.sag.actors.createmodel
 import akka.actor.Actor
 import pl.edu.pw.elka.sag.actors.messages.Messages.{CannotCreateTweetInstance, PrepareTweetInstance, TweetInstanceCreated}
 import pl.edu.pw.elka.sag.classification.setup.DenseInstanceBuilder
+import pl.edu.pw.elka.sag.config.WekaConfig
 import weka.core.DenseInstance
 
 class PrepareTweetInstanceActor extends Actor {
@@ -26,7 +27,7 @@ class PrepareTweetInstanceActor extends Actor {
   }
 
   def getColumnsFromText(text: String): Array[String] = {
-    text.split(",").map(_.trim)
+    text.split(WekaConfig.delimiter).map(_.trim)
   }
 
   def isNumberOfColumnsCorrect(columns: Array[String]): Boolean = {

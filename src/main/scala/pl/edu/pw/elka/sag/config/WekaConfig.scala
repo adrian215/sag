@@ -1,5 +1,6 @@
 package pl.edu.pw.elka.sag.config
 
-class WekaConfig {
-  val file = "D:\\training.csv"
+object WekaConfig {
+  val file = "D:\\training3.csv"
+  var delimiter = ";"
 }

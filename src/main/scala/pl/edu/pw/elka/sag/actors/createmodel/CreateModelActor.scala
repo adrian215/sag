@@ -6,9 +6,9 @@ import pl.edu.pw.elka.sag.actors.messages.Messages.{BuildModel, PrepareTweetInst
 import pl.edu.pw.elka.sag.config.{ApplicationConfig, WekaConfig}
 import pl.edu.pw.elka.sag.sentiments.POSITIVE
 import pl.edu.pw.elka.sag.weka.{ClsType, Weka}
+import weka.classifiers.Classifier
 
 class CreateModelActor extends Actor {
-  val config = new WekaConfig
   val weka = new Weka()
   val tweetWorkers = context.actorOf(RoundRobinPool(ApplicationConfig.actorSize).props(Props[PrepareTweetInstanceActor]))
   //  val tweetWorkers = context.actorOf(Props[PrepareTweetInstanceActor])
@@ -20,7 +20,7 @@ class CreateModelActor extends Actor {
     case BuildModel => {
       println("Starting main actor")
 
-      val tweets = io.Source.fromFile(config.file)
+      val tweets = io.Source.fromFile(WekaConfig.file)
       tweets.getLines().foreach(tweet => {
         val instance = PrepareTweetInstance(POSITIVE, tweet, instances.attribute(0))
         childActorSpawned()
@@ -54,7 +54,8 @@ class CreateModelActor extends Actor {
     if (allChildrenFinished) {
       println("Main actor finished")
       val filteredData = weka.filter(instances)
-      sender ! weka.buildModel(filteredData, ClsType.SVM)
+      val model: Classifier = weka.buildModel(filteredData, ClsType.SVM)
+      sender ! model
     }
   }
 

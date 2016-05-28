@@ -8,10 +8,14 @@ import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.core.SerializationHelper;
+import weka.core.stemmers.IteratedLovinsStemmer;
 import weka.core.stemmers.SnowballStemmer;
+import weka.core.stopwords.StopwordsHandler;
+import weka.core.tokenizers.AlphabeticTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -20,6 +24,11 @@ import java.util.Random;
  * Created by Miko on 27.05.2016.
  */
 public class Weka {
+    private StopwordsHandler stopwordsHandler;
+
+    public Weka() {
+        stopwordsHandler = new MyStopWordHandler();
+    }
 
     public Instances prepareInstances() {
         ArrayList<Attribute> atts = new ArrayList<>();
@@ -31,13 +40,13 @@ public class Weka {
     }
 
     public Instances filter(Instances data) throws Exception {
-        SnowballStemmer stemmer = new SnowballStemmer();
         StringToWordVector filter = new StringToWordVector();
 
         filter.setInputFormat(data);
         filter.setLowerCaseTokens(true);
-        filter.setStemmer(stemmer);
-
+        filter.setStemmer(new IteratedLovinsStemmer());
+        //filter.setStopwordsHandler(stopwordsHandler);
+        filter.setTokenizer(new AlphabeticTokenizer());
         Instances filteredData = Filter.useFilter(data, filter);
         filteredData.setClassIndex(0);
         return filteredData;
@@ -56,8 +65,8 @@ public class Weka {
 
         Evaluation eval = new Evaluation(data);
         eval.crossValidateModel(classifier, data, 10, new Random());
-        System.out.println("Instances: " + data.size());
-        System.out.println("Efficiency: " + eval.pctCorrect());
+        System.out.println(eval.toSummaryString(true));
+        saveModel("svm.model", classifier);
         return classifier;
     }
 
@@ -67,7 +76,7 @@ public class Weka {
 
     private Classifier getSVM() {
         LibSVM classifier = new LibSVM();
-        classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_C_SVC, LibSVM.TAGS_SVMTYPE));
+        classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_NU_SVC, LibSVM.TAGS_SVMTYPE));
         classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE));
         return classifier;
     }
