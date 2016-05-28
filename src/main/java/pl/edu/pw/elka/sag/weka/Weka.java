@@ -4,18 +4,12 @@ import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.LibSVM;
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.core.SelectedTag;
-import weka.core.SerializationHelper;
+import weka.core.*;
 import weka.core.stemmers.IteratedLovinsStemmer;
-import weka.core.stemmers.SnowballStemmer;
-import weka.core.stopwords.StopwordsHandler;
 import weka.core.tokenizers.AlphabeticTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -24,11 +18,7 @@ import java.util.Random;
  * Created by Miko on 27.05.2016.
  */
 public class Weka {
-    private StopwordsHandler stopwordsHandler;
 
-    public Weka() {
-        stopwordsHandler = new MyStopWordHandler();
-    }
 
     public Instances prepareInstances() {
         ArrayList<Attribute> atts = new ArrayList<>();
@@ -39,14 +29,17 @@ public class Weka {
         return new Instances("Rel", atts, 0);
     }
 
-    public Instances filter(Instances data) throws Exception {
+    public Filter createFilter(Instances data) throws Exception {
         StringToWordVector filter = new StringToWordVector();
-
         filter.setInputFormat(data);
         filter.setLowerCaseTokens(true);
         filter.setStemmer(new IteratedLovinsStemmer());
-        //filter.setStopwordsHandler(stopwordsHandler);
         filter.setTokenizer(new AlphabeticTokenizer());
+
+        return filter;
+    }
+
+    public Instances filter(Instances data, Filter filter) throws Exception {
         Instances filteredData = Filter.useFilter(data, filter);
         filteredData.setClassIndex(0);
         return filteredData;
@@ -63,10 +56,19 @@ public class Weka {
                 break;
         }
 
+        data.randomize(new Random());
+        int trainingSize = Math.round(0.9f * data.size());
+        int testSize = data.size() - trainingSize;
+        Instances training = new Instances(data, 0, trainingSize);
+        Instances test = new Instances(data, trainingSize, testSize);
+
+        System.out.println(training.toSummaryString());
+        System.out.println(test.toSummaryString());
+
+        classifier.buildClassifier(training);
         Evaluation eval = new Evaluation(data);
-        eval.crossValidateModel(classifier, data, 10, new Random());
+        eval.evaluateModel(classifier, test);
         System.out.println(eval.toSummaryString(true));
-        saveModel("svm.model", classifier);
         return classifier;
     }
 
@@ -84,5 +86,9 @@ public class Weka {
     private Classifier getNaiveBayes() {
         NaiveBayes classifier = new NaiveBayes();
         return classifier;
+    }
+
+    private double predict(Classifier classifier, Instance instance) throws Exception {
+        return classifier.classifyInstance(instance);
     }
 }
