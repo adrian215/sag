@@ -1,6 +1,6 @@
 package pl.edu.pw.elka.sag
 
-package object tweets {
+package object sentiments {
   sealed trait Sentiment {
     val value: Int
   }
