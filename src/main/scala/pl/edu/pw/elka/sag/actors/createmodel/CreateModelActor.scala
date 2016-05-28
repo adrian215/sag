@@ -1,38 +1,42 @@
 package pl.edu.pw.elka.sag.actors.createmodel
 
-import akka.actor.{Actor, Props}
+import akka.actor.Props
 import akka.routing.RoundRobinPool
-import pl.edu.pw.elka.sag.actors.messages.Messages.{BuildModel, PrepareTweetInstance, TweetInstanceCreated}
+import pl.edu.pw.elka.sag.actors.MasterActor
+import pl.edu.pw.elka.sag.actors.createmodel.CreateModelActor.ModelCreated
+import pl.edu.pw.elka.sag.actors.createmodel.Messages.{BuildModel, PrepareTweetInstance, TweetInstanceCreated}
+import pl.edu.pw.elka.sag.classification.Model
 import pl.edu.pw.elka.sag.config.{ApplicationConfig, WekaConfig}
 import pl.edu.pw.elka.sag.sentiments.POSITIVE
 import pl.edu.pw.elka.sag.weka.{ClsType, Weka}
 import weka.classifiers.Classifier
 
-class CreateModelActor extends Actor {
+object CreateModelActor {
+  type ModelCreated = (Model) => Unit
+  def props(modelCreated: ModelCreated): Props = Props(new CreateModelActor(modelCreated))
+}
+
+class CreateModelActor(modelCreated: ModelCreated) extends MasterActor {
+  override val workers = context.actorOf(RoundRobinPool(ApplicationConfig.actorSize).props(Props[PrepareTweetInstanceActor]))
+
   val weka = new Weka()
-  val tweetWorkers = context.actorOf(RoundRobinPool(ApplicationConfig.actorSize).props(Props[PrepareTweetInstanceActor]))
-  //  val tweetWorkers = context.actorOf(Props[PrepareTweetInstanceActor])
   val instances = weka.prepareInstances()
-  var allToWork: Int = 0
-  var currentWorked = 0
 
   override def receive: Receive = {
     case BuildModel => {
       println("Starting main actor")
 
-      val tweets = io.Source.fromFile(WekaConfig.file)
+      val tweets = io.Source.fromFile(WekaConfig.trainingFile)
       tweets.getLines().foreach(tweet => {
         val instance = PrepareTweetInstance(POSITIVE, tweet, instances.attribute(0))
-        childActorSpawned()
-//        println(s"Sending message ${instance} to child actor")
-        tweetWorkers ! instance
+        spawnChildWithMessage(instance)
       })
 
       tweets close
     }
 
     case TweetInstanceCreated(instance) => {
-//      println(s"Received TweetInstance from ${sender}")
+      //      println(s"Received TweetInstance from ${sender}")
       childActorFinished()
       instances.add(instance)
     }
@@ -44,22 +48,12 @@ class CreateModelActor extends Actor {
   }
 
 
-  def childActorSpawned(): Unit = {
-    allToWork += 1
+  override def finishCurrentActor(): Unit = {
+    println("Main actor finished")
+    val filter = weka.createFilter(instances)
+    val filteredData = weka.filter(instances, filter)
+    val model: Classifier = weka.buildModel(filteredData, ClsType.SVM)
+    modelCreated.apply(Model(model, filter))
   }
 
-  def childActorFinished(): Unit = {
-    currentWorked += 1
-    println(s"Finished $currentWorked / $allToWork")
-    if (allChildrenFinished) {
-      println("Main actor finished")
-      val filteredData = weka.filter(instances)
-      val model: Classifier = weka.buildModel(filteredData, ClsType.SVM)
-      sender ! model
-    }
-  }
-
-  def allChildrenFinished: Boolean = {
-    currentWorked == allToWork
-  }
 }

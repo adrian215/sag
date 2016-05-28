@@ -1,5 +1,6 @@
 package pl.edu.pw.elka.sag.classification.setup
 
+import pl.edu.pw.elka.sag.config.WekaConfig
 import pl.edu.pw.elka.sag.sentiments.{Sentiment, POSITIVE, NEGATIVE}
 import weka.core.{DenseInstance, Attribute}
 
@@ -35,5 +36,9 @@ class DenseInstanceBuilder {
     instanceValue(0) = attribute.addStringValue(tweetText)
     instanceValue(1) = sentiment.value
     new DenseInstance(1.0, instanceValue)
+  }
+
+  def getColumnsFromText(text: String): Array[String] = {
+    text.split(WekaConfig.delimiter).map(_.trim)
   }
 }

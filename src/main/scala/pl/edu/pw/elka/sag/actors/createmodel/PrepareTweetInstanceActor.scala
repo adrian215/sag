@@ -1,9 +1,8 @@
 package pl.edu.pw.elka.sag.actors.createmodel
 
 import akka.actor.Actor
-import pl.edu.pw.elka.sag.actors.messages.Messages.{CannotCreateTweetInstance, PrepareTweetInstance, TweetInstanceCreated}
+import pl.edu.pw.elka.sag.actors.createmodel.Messages.{CannotCreateTweetInstance, PrepareTweetInstance, TweetInstanceCreated}
 import pl.edu.pw.elka.sag.classification.setup.DenseInstanceBuilder
-import pl.edu.pw.elka.sag.config.WekaConfig
 import weka.core.DenseInstance
 
 class PrepareTweetInstanceActor extends Actor {
@@ -12,7 +11,7 @@ class PrepareTweetInstanceActor extends Actor {
 
   override def receive: Receive = {
     case PrepareTweetInstance(todelete, text, att) => {
-      val columns = getColumnsFromText(text)
+      val columns = denseInstanceBuilder.getColumnsFromText(text)
 
       if (isNumberOfColumnsCorrect(columns)) {
         val denseInstance: DenseInstance = denseInstanceBuilder.buildDenseInstanceFromColumns(att, columns)
@@ -24,10 +23,6 @@ class PrepareTweetInstanceActor extends Actor {
         sender ! CannotCreateTweetInstance
       }
     }
-  }
-
-  def getColumnsFromText(text: String): Array[String] = {
-    text.split(WekaConfig.delimiter).map(_.trim)
   }
 
   def isNumberOfColumnsCorrect(columns: Array[String]): Boolean = {

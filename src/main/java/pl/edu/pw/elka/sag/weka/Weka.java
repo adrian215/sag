@@ -21,6 +21,9 @@ import java.util.Random;
  */
 public class Weka {
 
+    public Weka() {
+//        stopwordsHandler = new MyStopWordHandler();
+    }
 
     public Instances prepareInstances() {
         ArrayList<Attribute> atts = new ArrayList<>();
