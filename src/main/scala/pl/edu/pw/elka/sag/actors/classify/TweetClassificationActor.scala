@@ -11,6 +11,7 @@ import weka.filters.Filter
 
 import pl.edu.pw.elka.sag.tweets.TweetConversions.doubleToSentiment
 
+@Deprecated
 class TweetClassificationActor extends Actor{
 
   val weka = new Weka()
@@ -22,7 +23,7 @@ class TweetClassificationActor extends Actor{
       val classifier: Classifier = model.classifier
       val instances = weka.prepareInstances()
 
-      val instance: Option[DenseInstance] = dib.buildDenseInstance(tweet, instances.attribute((0)))
+      val instance: Option[DenseInstance] = dib.buildDenseInstance(tweet, instances.attribute(0))
 
       val responseMessage = instance.map { instance =>
         val result = classifyTweet(filter, classifier, instances, instance)
