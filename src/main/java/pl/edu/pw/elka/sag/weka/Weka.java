@@ -6,6 +6,7 @@ import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.LibSVM;
 import weka.core.*;
 import weka.core.stemmers.IteratedLovinsStemmer;
+import weka.core.stemmers.SnowballStemmer;
 import weka.core.tokenizers.AlphabeticTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
@@ -40,11 +41,13 @@ public class Weka {
         filter.setLowerCaseTokens(true);
         filter.setStemmer(new IteratedLovinsStemmer());
         filter.setTokenizer(new AlphabeticTokenizer());
+        filter.setWordsToKeep(20000);
 
         return filter;
     }
 
     public Instances filter(Instances data, Filter filter) throws Exception {
+        data = removeNull(data);
         Instances filteredData = Filter.useFilter(data, filter);
         filteredData.setClassIndex(0);
         return filteredData;
@@ -68,7 +71,6 @@ public class Weka {
         Instances test = new Instances(data, trainingSize, testSize);
 
         System.out.println(training.toSummaryString());
-        System.out.println(test.toSummaryString());
 
         classifier.buildClassifier(training);
         Evaluation eval = new Evaluation(data);
@@ -79,7 +81,7 @@ public class Weka {
 
     private Classifier getSVM() {
         LibSVM classifier = new LibSVM();
-        classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_NU_SVC, LibSVM.TAGS_SVMTYPE));
+        classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_C_SVC, LibSVM.TAGS_SVMTYPE));
         classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE));
         return classifier;
     }
@@ -87,5 +89,19 @@ public class Weka {
     private Classifier getNaiveBayes() {
         NaiveBayes classifier = new NaiveBayes();
         return classifier;
+    }
+
+    private Instances removeNull(Instances instances) {
+        Instances notNullInstances = new Instances(instances, 0);
+        for (int i =0; i < instances.size(); i++) {
+            try {
+                instances.get(i).toString();
+                notNullInstances.add(instances.get(i));
+            }
+            catch (NullPointerException e) {
+
+            }
+        }
+        return notNullInstances;
     }
 }
