@@ -39,8 +39,8 @@ class CreateModelActor(modelCreated: ModelCreated) extends MasterActor {
     }
 
     case _ => {
-      println(s"$sender finished with errors")
-      childActorFinished()
+//      println(s"$sender finished with errors")
+      childActorFailed()
     }
   }
 

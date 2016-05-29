@@ -15,7 +15,10 @@ class ElectionsPredictionActor(val model: Model) extends MasterActor{
 
   override def receive: Receive = {
     case StartTweetClassification =>
-      WekaConfig.classificationFiles.foreach(file => workers ! PredictCandidate(model, file))
+      WekaConfig.classificationFiles.foreach(file => {
+        val message: PredictCandidate = PredictCandidate(model, file)
+        spawnChildWithMessage(message)
+      })
   }
 
   override def finishCurrentActor(): Unit = ???

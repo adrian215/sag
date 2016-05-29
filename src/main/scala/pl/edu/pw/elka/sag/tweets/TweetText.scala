@@ -1,4 +1,4 @@
-package pl.edu.pw.elka.sag.utils
+package pl.edu.pw.elka.sag.tweets
 
 class TweetText(val text: String) {
   val EMPTY: String = ""

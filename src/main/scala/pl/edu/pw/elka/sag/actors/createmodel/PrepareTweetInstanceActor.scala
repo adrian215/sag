@@ -2,7 +2,7 @@ package pl.edu.pw.elka.sag.actors.createmodel
 
 import akka.actor.Actor
 import pl.edu.pw.elka.sag.actors.createmodel.Messages.{CannotCreateTweetInstance, PrepareTweetInstance, TweetInstanceCreated}
-import pl.edu.pw.elka.sag.classification.setup.DenseInstanceBuilder
+import pl.edu.pw.elka.sag.classification.DenseInstanceBuilder
 
 class PrepareTweetInstanceActor extends Actor {
 

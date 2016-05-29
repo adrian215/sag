@@ -1,8 +1,8 @@
-package pl.edu.pw.elka.sag.classification.setup
+package pl.edu.pw.elka.sag.classification
 
 import pl.edu.pw.elka.sag.config.WekaConfig
-import pl.edu.pw.elka.sag.utils.TweetConversion.{TweetTextToString, toTweetText}
-import pl.edu.pw.elka.sag.{NEGATIVE, POSITIVE, Sentiment}
+import pl.edu.pw.elka.sag.tweets.TweetConversions.{TweetTextToString, toTweetText}
+import pl.edu.pw.elka.sag.tweets.{NEGATIVE, POSITIVE, Sentiment, TweetConversions}
 import weka.core.{Attribute, DenseInstance}
 
 class DenseInstanceBuilder {

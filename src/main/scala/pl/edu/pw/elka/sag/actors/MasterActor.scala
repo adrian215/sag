@@ -7,17 +7,19 @@ trait MasterActor extends Actor{
 
   private var allWorkers: Int = 0
   private var currentWorked = 0
+  private var failed = 0
   protected def workers: ActorRef
 
-  final protected def spawnChildWithMessage(instance: PrepareTweetInstance): Unit = {
+  final protected def spawnChildWithMessage(message: Any): Unit = {
     allWorkers += 1
-    println(s"Sending message $instance to child actor")
-    workers ! instance
+    showStatus
+    //    println(s"Sending message $message to child actor")
+    workers ! message
   }
 
   final protected def childActorFinished(): Unit = {
     currentWorked += 1
-    println(s"Finished $currentWorked / $allWorkers")
+    showStatus
     if (allChildrenFinished) {
       finishCurrentActor()
     }
@@ -27,5 +29,14 @@ trait MasterActor extends Actor{
     currentWorked == allWorkers
   }
 
+  final protected def childActorFailed(): Unit = {
+    failed += 1
+    childActorFinished()
+  }
+
   protected def finishCurrentActor(): Unit
+
+  def showStatus: Unit = {
+    print(s"\rWorking childs: $currentWorked / $allWorkers, failed: $failed")
+  }
 }

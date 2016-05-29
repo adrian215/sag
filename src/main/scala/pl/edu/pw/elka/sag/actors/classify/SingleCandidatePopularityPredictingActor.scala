@@ -1,38 +1,42 @@
 package pl.edu.pw.elka.sag.actors.classify
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, Props}
+import akka.routing.RoundRobinPool
 import pl.edu.pw.elka.sag.actors.MasterActor
-import pl.edu.pw.elka.sag.actors.classify.Messages.PredictCandidate
-import pl.edu.pw.elka.sag.classification.setup.DenseInstanceBuilder
-import pl.edu.pw.elka.sag.weka.Weka
-import weka.classifiers.Classifier
-import weka.core.DenseInstance
-import weka.filters.Filter
+import pl.edu.pw.elka.sag.actors.classify.Messages.{CannotClassifyTweet, ClassifyTweet, PredictCandidate, TweetClassified}
+import pl.edu.pw.elka.sag.classification.Model
+import pl.edu.pw.elka.sag.config.ApplicationConfig
+import weka.classifiers.{AbstractClassifier, Classifier}
 
 class SingleCandidatePopularityPredictingActor extends MasterActor {
-  override def workers: ActorRef = ???
+  override protected def workers: ActorRef = context.actorOf(RoundRobinPool(ApplicationConfig.actorSize).props(Props[TweetClassificationActor]))
+
+  private val candidateVoter: CandidateVoter = new CandidateVoter
 
   override def receive: Receive = {
     case PredictCandidate(model, file) =>
-      val filter: Filter = model.filter
-      val classifier: Classifier = model.classifier
-      val weka = new Weka()
-      val dib = new DenseInstanceBuilder();
-
-      val tweets = io.Source.fromFile(file)
-      tweets.getLines().foreach { tweet =>
-        val instances = weka.prepareInstances()
-        //        val instance = dib.buildDenseInstanceFromColumns(instances.attribute(0), dib.getColumnsFromText(tweet))
-        val instance: Option[DenseInstance] = dib.buildDenseInstance(tweet, instances.attribute((0)))
-        instance.foreach { instance =>
-          instances.add(instance)
-          val filteredInstances = weka.filter(instances, filter)
-          val result: Double = classifier.classifyInstance(filteredInstances.get(0))
-          println(s"Wynik: $result dla $tweet")
-        }
-      }
-      tweets.close()
+      predicateCandidate(model, file)
+    case TweetClassified(response) =>
+      childActorFinished()
+      candidateVoter.vote(response.sentiment)
+    case CannotClassifyTweet => childActorFailed()
   }
 
-  override def finishCurrentActor(): Unit = ???
+  private def predicateCandidate(model: Model, file: FileName): Unit = {
+    val tweets = io.Source.fromFile(file)
+    tweets.getLines().foreach { tweet =>
+      val classifyTweet = ClassifyTweet(makeCopy(model), tweet)
+      spawnChildWithMessage(classifyTweet)
+    }
+    tweets.close()
+  }
+
+  private def makeCopy(model: Model): Model = {
+    val copy: Classifier = AbstractClassifier.makeCopy(model.classifier)
+    model.copy(classifier = copy)
+  }
+
+  override protected def finishCurrentActor(): Unit = {
+    println(s"Poparcie na podstawie tweetow: ${candidateVoter.getResult}")
+  }
 }

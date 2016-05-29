@@ -1,4 +1,4 @@
-package pl.edu.pw.elka.sag
+package pl.edu.pw.elka.sag.tweets
 
 sealed trait Sentiment {
   def value: Int
