@@ -5,8 +5,8 @@ import Messages.PrepareTweetInstance
 
 trait MasterActor extends Actor{
 
-  private[MasterActor] var allWorkers: Int = 0
-  private[MasterActor] var currentWorked = 0
+  private var allWorkers: Int = 0
+  private var currentWorked = 0
   protected def workers: ActorRef
 
   final protected def spawnChildWithMessage(instance: PrepareTweetInstance): Unit = {
@@ -23,7 +23,7 @@ trait MasterActor extends Actor{
     }
   }
 
-  private[MasterActor] def allChildrenFinished: Boolean = {
+  private def allChildrenFinished: Boolean = {
     currentWorked == allWorkers
   }
 

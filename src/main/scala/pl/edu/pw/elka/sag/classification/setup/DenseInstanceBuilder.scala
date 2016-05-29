@@ -16,18 +16,18 @@ class DenseInstanceBuilder {
       None
   }
 
-  private[DenseInstanceBuilder] def isNumberOfColumnsCorrect(columns: Array[String]): Boolean = {
+  private def isNumberOfColumnsCorrect(columns: Array[String]): Boolean = {
     columns.length == 5
   }
 
-  private[DenseInstanceBuilder] def buildDenseInstanceFromColumns(att: Attribute, columns: Array[String]): DenseInstance = {
+  private def buildDenseInstanceFromColumns(att: Attribute, columns: Array[String]): DenseInstance = {
     val sentiment = convertSentiment(columns(3))
     val tweetText = getTweetText(columns(4))
     val denseInstance: DenseInstance = createDenseInstance(sentiment, tweetText, att)
     denseInstance
   }
 
-  private[DenseInstanceBuilder] def convertSentiment(oldLabel: String): Sentiment = {
+  private def convertSentiment(oldLabel: String): Sentiment = {
     oldLabel match {
       case ":(" => NEGATIVE
       case ":)" => POSITIVE
@@ -35,21 +35,21 @@ class DenseInstanceBuilder {
     }
   }
 
-  private[DenseInstanceBuilder] def getTweetText(tweetText: String): String = {
+  private def getTweetText(tweetText: String): String = {
     tweetText
       .removeUrl()
       .removePerson()
       .removeHashtag()
   }
 
-  private[DenseInstanceBuilder] def createDenseInstance(sentiment: Sentiment, tweetText: String, attribute: Attribute): DenseInstance = {
+  private def createDenseInstance(sentiment: Sentiment, tweetText: String, attribute: Attribute): DenseInstance = {
     val instanceValue: Array[Double] = new Array[Double](2)
     instanceValue(0) = attribute.addStringValue(tweetText)
     instanceValue(1) = sentiment.value
     new DenseInstance(1.0, instanceValue)
   }
 
-  private[DenseInstanceBuilder] def getColumnsFromText(text: String): Array[String] = {
+  private def getColumnsFromText(text: String): Array[String] = {
     text.split(WekaConfig.delimiter).map(_.trim)
   }
 }
