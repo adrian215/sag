@@ -16,54 +16,50 @@ import scala.io.StdIn
 
 object Hello {
   val system: ActorSystem = ActorSystem("Example")
-
+  val wekaFileHandler = new WekaFileHandler()
 
   def main(args: Array[String]): Unit = {
     start()
   }
 
   def start(): Unit ={
-    val actor: ActorRef = system.actorOf(CreateModelActor.props(ClsType.SVM, model => {
-      val electionsPrediction = system.actorOf(ElectionsPredictionActor.props(model,finished))
+    println("Algorithm type [svm, nb]:")
+    val classifierTypeIn = StdIn.readLine().toUpperCase()
+    val classifierType = ClsType.valueOf(classifierTypeIn)
+
+    println("Build model? [y/n]")
+    val buildModelIn = StdIn.readLine()
+    val buildModel = if(buildModelIn == "n") false else true
+
+    println("Algorithm: " + classifierTypeIn + "\nBuild model: " + buildModel)
+
+    if (buildModel) {
+      classifyWithNewModel(classifierType)
+    } else {
+      classifyWithExistingModel(classifierType)
+    }
+  }
+
+  def classifyWithNewModel(classifierType: ClsType): Unit = {
+    val actor: ActorRef = system.actorOf(CreateModelActor.props(classifierType, model => {
+      wekaFileHandler.saveClassifier(model.classifier, classifierType)
+      wekaFileHandler.saveFilter(model.filter, classifierType)
+      val electionsPrediction = system.actorOf(ElectionsPredictionActor.props(model, finished))
       electionsPrediction ! StartTweetClassification
     }))
     actor ! BuildModel
   }
 
-  def finished(popularity: List[CandidatePopularity]): Unit ={
-    system.terminate()
-    println(popularity)
+  def classifyWithExistingModel(classifierType: ClsType): Unit = {
+    val classifier = wekaFileHandler.loadClassifier(classifierType)
+    val filter = wekaFileHandler.loadFilter(classifierType)
+    val model = AlgorithmModel(classifier, filter)
+    val electionsPrediction = system.actorOf(ElectionsPredictionActor.props(model, finished))
+    electionsPrediction ! StartTweetClassification
   }
 
-}
-
-def main(args: Array[String]) {
-  println("Algorithm type [svm, nb]:")
-  val classifierTypeIn = StdIn.readLine().toUpperCase()
-  val classifierType = ClsType.valueOf(classifierTypeIn)
-
-  println("Build model? [y/n]")
-  val buildModelIn = StdIn.readLine()
-  val buildModel = if(buildModelIn == "n") false else true
-
-  println("Algorithm: " + classifierTypeIn + "\nBuild model: " + buildModel )
-
-  val wekaFileHandler = new WekaFileHandler()
-  val system: ActorSystem = ActorSystem("Example")
-
-  if (buildModel) {
-  val actor: ActorRef = system.actorOf(CreateModelActor.props(classifierType, model => {
-  wekaFileHandler.saveClassifier(model.classifier, classifierType)
-  wekaFileHandler.saveFilter(model.filter, classifierType)
-  val electionsPrediction = system.actorOf(ElectionsPredictionActor.props(model))
-  electionsPrediction ! StartTweetClassification
-}))
-  actor ! BuildModel
-} else {
-  val classifier = wekaFileHandler.loadClassifier(classifierType)
-  val filter = wekaFileHandler.loadFilter(classifierType)
-  val model = AlgorithmModel(classifier, filter)
-  val electionsPrediction = system.actorOf(ElectionsPredictionActor.props(model))
-  electionsPrediction ! StartTweetClassification
-}
+  def finished(popularity: List[CandidatePopularity]): Unit ={
+    system.terminate()
+    println(s"\nWyniki klasyfikacji: $popularity")
+  }
 }
