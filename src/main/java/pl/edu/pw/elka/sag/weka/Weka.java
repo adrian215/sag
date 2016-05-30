@@ -1,19 +1,19 @@
 package pl.edu.pw.elka.sag.weka;
 
+import pl.edu.pw.elka.sag.config.Configuration;
 import pl.edu.pw.elka.sag.config.WekaConfig;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.LibSVM;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instances;
+import weka.core.SelectedTag;
 import weka.core.stemmers.IteratedLovinsStemmer;
-import weka.core.stemmers.SnowballStemmer;
 import weka.core.tokenizers.AlphabeticTokenizer;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -22,6 +22,7 @@ import java.util.Random;
  * Created by Miko on 27.05.2016.
  */
 public class Weka {
+    private WekaConfig wekaConfig = Configuration.getConfig();
 
     public Weka() {
 //        stopwordsHandler = new MyStopWordHandler();
@@ -42,7 +43,7 @@ public class Weka {
         filter.setLowerCaseTokens(true);
         filter.setStemmer(new IteratedLovinsStemmer());
         filter.setTokenizer(new AlphabeticTokenizer());
-        filter.setWordsToKeep(WekaConfig.wordsToKeep());
+        filter.setWordsToKeep(wekaConfig.wordsToKeep());
 
         return filter;
     }
@@ -66,7 +67,7 @@ public class Weka {
         }
 
         data.randomize(new Random());
-        int trainingSize = Math.round(WekaConfig.trainingSetSize() * data.size());
+        int trainingSize = Math.round(wekaConfig.trainingSetSize() * data.size());
         int testSize = data.size() - trainingSize;
         Instances training = new Instances(data, 0, trainingSize);
         Instances test = new Instances(data, trainingSize, testSize);

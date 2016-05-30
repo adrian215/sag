@@ -1,5 +1,6 @@
 package pl.edu.pw.elka.sag.weka;
 
+import pl.edu.pw.elka.sag.config.Configuration;
 import pl.edu.pw.elka.sag.config.WekaConfig;
 import weka.classifiers.Classifier;
 import weka.core.SerializationHelper;
@@ -13,6 +14,9 @@ import java.io.FileOutputStream;
  * Created by Miko on 28.05.2016.
  */
 public class WekaFileHandler {
+
+    private WekaConfig wekaConfig = Configuration.getConfig();
+
     public void saveClassifier(Classifier classifier, ClsType classifierType) throws Exception {
         String path = getModelPath(classifierType);
         save(path, classifier);
@@ -51,10 +55,10 @@ public class WekaFileHandler {
         String path = null;
         switch (clsType) {
             case SVM:
-                path = WekaConfig.svmModelFile();
+                path = wekaConfig.svmModelFile();
                 break;
             case NB:
-                path = WekaConfig.naiveBayesModelFile();
+                path = wekaConfig.naiveBayesModelFile();
                 break;
         }
 
@@ -65,10 +69,10 @@ public class WekaFileHandler {
         String path = null;
         switch (clsType) {
             case SVM:
-                path = WekaConfig.svmFilterFile();
+                path = wekaConfig.svmFilterFile();
                 break;
             case NB:
-                path = WekaConfig.naiveBayesFilterFile();
+                path = wekaConfig.naiveBayesFilterFile();
                 break;
         }
 

@@ -1,11 +1,12 @@
 package pl.edu.pw.elka.sag.utils
 
-import pl.edu.pw.elka.sag.config.WekaConfig
+import pl.edu.pw.elka.sag.config.Configuration
 import pl.edu.pw.elka.sag.model.TweetConversions.{TweetTextToString, toTweetText}
-import pl.edu.pw.elka.sag.model.{NEGATIVE, POSITIVE, Sentiment, TweetConversions}
+import pl.edu.pw.elka.sag.model.{NEGATIVE, POSITIVE, Sentiment}
 import weka.core.{Attribute, DenseInstance}
 
 class DenseInstanceBuilder {
+  val wekaConfig = Configuration.getConfig()
 
   def buildDenseInstance(text: String, attribute: Attribute): Option[DenseInstance] = {
     val columns = getColumnsFromText(text)
@@ -50,6 +51,6 @@ class DenseInstanceBuilder {
   }
 
   private def getColumnsFromText(text: String): Array[String] = {
-    text.split(WekaConfig.delimiter).map(_.trim)
+    text.split(wekaConfig.delimiter).map(_.trim)
   }
 }

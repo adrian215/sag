@@ -1,10 +1,10 @@
 package pl.edu.pw.elka.sag.actors.classify
 
-import akka.actor.{Props, Actor}
+import akka.actor.Actor
 import pl.edu.pw.elka.sag.actors.classify.Messages.{CandidatePredicted, PredictCandidate}
-import pl.edu.pw.elka.sag.utils.{CandidateVoter, DenseInstanceBuilder}
-import pl.edu.pw.elka.sag.model.{CandidatePopularity, AlgorithmModel}
 import pl.edu.pw.elka.sag.model.TweetConversions.doubleToSentiment
+import pl.edu.pw.elka.sag.model.{AlgorithmModel, CandidatePopularity}
+import pl.edu.pw.elka.sag.utils.{CandidateVoter, DenseInstanceBuilder}
 import pl.edu.pw.elka.sag.weka.Weka
 import weka.classifiers.{AbstractClassifier, Classifier}
 import weka.core.{Instance, Instances}
