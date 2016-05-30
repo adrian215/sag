@@ -21,7 +21,7 @@ class CandidateVoter {
     allVotes += 1
   }
 
-  def getResult: CandidatePopularity = {
+  def getResult: Popularity = {
     positiveVotes.toDouble / allVotes.toDouble
   }
 

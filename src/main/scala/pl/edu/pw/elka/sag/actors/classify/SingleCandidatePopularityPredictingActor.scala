@@ -1,9 +1,9 @@
 package pl.edu.pw.elka.sag.actors.classify
 
-import akka.actor.Actor
-import pl.edu.pw.elka.sag.actors.classify.Messages.PredictCandidate
+import akka.actor.{Props, Actor}
+import pl.edu.pw.elka.sag.actors.classify.Messages.{CandidatePredicted, PredictCandidate}
 import pl.edu.pw.elka.sag.utils.{CandidateVoter, DenseInstanceBuilder}
-import pl.edu.pw.elka.sag.model.AlgorithmModel
+import pl.edu.pw.elka.sag.model.{CandidatePopularity, AlgorithmModel}
 import pl.edu.pw.elka.sag.model.TweetConversions.doubleToSentiment
 import pl.edu.pw.elka.sag.weka.Weka
 import weka.classifiers.{AbstractClassifier, Classifier}
@@ -18,7 +18,8 @@ class SingleCandidatePopularityPredictingActor extends Actor{
   val dib = new DenseInstanceBuilder()
 
   override def receive: Receive = {
-    case PredictCandidate(model, file) => predicateCandidate(makeCopy(model), file)
+    case PredictCandidate(candidate, model, file) =>
+      predicateCandidate(candidate, makeCopy(model), file)
   }
 
   private def makeCopy(model: AlgorithmModel): AlgorithmModel = {
@@ -27,13 +28,14 @@ class SingleCandidatePopularityPredictingActor extends Actor{
     model.copy(classifier = classifierCopy, filter = filterCopy)
   }
 
-  private def predicateCandidate(model: AlgorithmModel, file: FileName): Unit = {
+  private def predicateCandidate(candidate: Candidate, model: AlgorithmModel, file: FileName): Unit = {
     val tweets = io.Source.fromFile(file)
-    classifyTweets(model, tweets)
+    val popularity: Popularity = classifyTweets(model, tweets)
     tweets.close()
+    sender ! CandidatePredicted(CandidatePopularity(candidate, popularity))
   }
 
-  private def classifyTweets(model: AlgorithmModel, tweets: BufferedSource): CandidatePopularity = {
+  private def classifyTweets(model: AlgorithmModel, tweets: BufferedSource): Popularity = {
     val filter: Filter = model.filter
     val classifier: Classifier = model.classifier
 
@@ -47,7 +49,7 @@ class SingleCandidatePopularityPredictingActor extends Actor{
     weka.filter(instances, filter)
   }
 
-  private def classifyPreparedTweets(classifier: Classifier, preparedTweets: Instances): CandidatePopularity = {
+  private def classifyPreparedTweets(classifier: Classifier, preparedTweets: Instances): Popularity = {
     val candidateVoter: CandidateVoter = new CandidateVoter
 
     each(preparedTweets)

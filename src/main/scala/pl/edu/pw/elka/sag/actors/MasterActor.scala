@@ -13,7 +13,6 @@ trait MasterActor extends Actor{
   final protected def spawnChildWithMessage(message: Any): Unit = {
     allWorkers += 1
     showStatus
-    //    println(s"Sending message $message to child actor")
     workers ! message
   }
 
@@ -25,6 +24,8 @@ trait MasterActor extends Actor{
     }
   }
 
+  protected def finishCurrentActor(): Unit
+
   private def allChildrenFinished: Boolean = {
     currentWorked == allWorkers
   }
@@ -33,8 +34,6 @@ trait MasterActor extends Actor{
     failed += 1
     childActorFinished()
   }
-
-  protected def finishCurrentActor(): Unit
 
   def showStatus: Unit = {
     print(s"\rWorking childs: $currentWorked / $allWorkers, failed: $failed")
