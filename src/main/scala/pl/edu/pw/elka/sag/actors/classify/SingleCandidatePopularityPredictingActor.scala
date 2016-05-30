@@ -21,14 +21,19 @@ class SingleCandidatePopularityPredictingActor extends Actor{
     case PredictCandidate(model, file) => predicateCandidate(makeCopy(model), file)
   }
 
+  private def makeCopy(model: AlgorithmModel): AlgorithmModel = {
+    val classifierCopy: Classifier = AbstractClassifier.makeCopy(model.classifier)
+    val filterCopy: Filter = Filter.makeCopy(model.filter)
+    model.copy(classifier = classifierCopy, filter = filterCopy)
+  }
+
   private def predicateCandidate(model: AlgorithmModel, file: FileName): Unit = {
     val tweets = io.Source.fromFile(file)
     classifyTweets(model, tweets)
     tweets.close()
   }
 
-  private def classifyTweets(oldModel: AlgorithmModel, tweets: BufferedSource): CandidatePopularity = {
-    val model = makeCopy(oldModel)
+  private def classifyTweets(model: AlgorithmModel, tweets: BufferedSource): CandidatePopularity = {
     val filter: Filter = model.filter
     val classifier: Classifier = model.classifier
 
@@ -36,17 +41,10 @@ class SingleCandidatePopularityPredictingActor extends Actor{
     classifyPreparedTweets(classifier, preparedTweets)
   }
 
-  private def makeCopy(model: AlgorithmModel): AlgorithmModel = {
-    val classifierCopy: Classifier = AbstractClassifier.makeCopy(model.classifier)
-    val filterCopy: Filter = Filter.makeCopy(model.filter)
-    model.copy(classifier = classifierCopy, filter = filterCopy)
-  }
-
   private def prepareTweetToClassification(tweets: BufferedSource, filter: Filter): Instances = {
     val instances = weka.prepareInstances()
     populateInstancesWithTweets(tweets, instances)
-    val filteredInstances: Instances = weka.filter(instances, filter)
-    filteredInstances
+    weka.filter(instances, filter)
   }
 
   private def classifyPreparedTweets(classifier: Classifier, preparedTweets: Instances): CandidatePopularity = {
