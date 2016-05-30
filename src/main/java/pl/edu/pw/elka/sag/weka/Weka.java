@@ -1,5 +1,6 @@
 package pl.edu.pw.elka.sag.weka;
 
+import pl.edu.pw.elka.sag.config.WekaConfig;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
@@ -41,7 +42,7 @@ public class Weka {
         filter.setLowerCaseTokens(true);
         filter.setStemmer(new IteratedLovinsStemmer());
         filter.setTokenizer(new AlphabeticTokenizer());
-        filter.setWordsToKeep(20000);
+        filter.setWordsToKeep(WekaConfig.wordsToKeep());
 
         return filter;
     }
@@ -59,18 +60,19 @@ public class Weka {
             case SVM:
                 classifier = getSVM();
                 break;
-            case NAIVE_BAYES:
+            case NB:
                 classifier = getNaiveBayes();
                 break;
         }
 
         data.randomize(new Random());
-        int trainingSize = Math.round(0.9f * data.size());
+        int trainingSize = Math.round(WekaConfig.trainingSetSize() * data.size());
         int testSize = data.size() - trainingSize;
         Instances training = new Instances(data, 0, trainingSize);
         Instances test = new Instances(data, trainingSize, testSize);
 
         System.out.println(training.toSummaryString());
+        System.out.println(test.toSummaryString());
 
         classifier.buildClassifier(training);
         Evaluation eval = new Evaluation(data);
