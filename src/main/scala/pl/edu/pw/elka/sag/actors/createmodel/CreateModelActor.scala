@@ -8,6 +8,9 @@ import pl.edu.pw.elka.sag.config.{ApplicationConfig, WekaConfig}
 import pl.edu.pw.elka.sag.model.AlgorithmModel
 import pl.edu.pw.elka.sag.weka.{ClsType, Weka}
 import weka.classifiers.Classifier
+import weka.core.DenseInstance
+
+import scala.io.BufferedSource
 
 object CreateModelActor {
   def props(modelCreated: ModelCreated): Props = Props(new CreateModelActor(modelCreated))
@@ -20,30 +23,31 @@ class CreateModelActor(modelCreated: ModelCreated) extends MasterActor {
   val instances = weka.prepareInstances()
 
   override def receive: Receive = {
-    case BuildModel => {
-      println("Starting main actor")
-
-      val tweets = io.Source.fromFile(WekaConfig.trainingFile)
-      tweets.getLines().foreach(tweet => {
-        val instance = PrepareTweetInstance(tweet, instances.attribute(0))
-        spawnChildWithMessage(instance)
-      })
-
-      tweets close
-    }
-
-    case TweetInstanceCreated(instance) => {
-      //      println(s"Received TweetInstance from ${sender}")
-      childActorFinished()
-      instances.add(instance)
-    }
-
-    case _ => {
-//      println(s"$sender finished with errors")
-      childActorFailed()
-    }
+    case BuildModel => buildModel()
+    case TweetInstanceCreated(instance) => receiveTweetInstance(instance)
+    case _ => childActorFailed()
   }
 
+
+  private def buildModel(): Unit = {
+    println("Starting main actor")
+
+    val tweets = io.Source.fromFile(WekaConfig.trainingFile)
+    delegateTweetInstanceCreationToChildren(tweets)
+    tweets close
+  }
+
+  private def delegateTweetInstanceCreationToChildren(tweets: BufferedSource): Unit = {
+    tweets.getLines().foreach(tweet => {
+      val instance = PrepareTweetInstance(tweet, instances.attribute(0))
+      spawnChildWithMessage(instance)
+    })
+  }
+
+  private def receiveTweetInstance(instance: DenseInstance): Unit = {
+    childActorFinished()
+    instances add instance
+  }
 
   override protected def finishCurrentActor(): Unit = {
     println("Main actor finished")

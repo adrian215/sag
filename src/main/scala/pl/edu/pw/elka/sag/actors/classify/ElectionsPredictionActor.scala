@@ -14,11 +14,14 @@ class ElectionsPredictionActor(val model: AlgorithmModel) extends MasterActor{
   override def workers: ActorRef = context.actorOf(Props[SingleCandidatePopularityPredictingActor])
 
   override def receive: Receive = {
-    case StartTweetClassification =>
-      WekaConfig.classificationFiles.foreach(file => {
-        val message: PredictCandidate = PredictCandidate(model, file)
-        spawnChildWithMessage(message)
-      })
+    case StartTweetClassification => delegateClassificationToChildren()
+  }
+
+  def delegateClassificationToChildren(): Unit = {
+    WekaConfig.classificationFiles.foreach(file => {
+      val message: PredictCandidate = PredictCandidate(model, file)
+      spawnChildWithMessage(message)
+    })
   }
 
   override def finishCurrentActor(): Unit = ???

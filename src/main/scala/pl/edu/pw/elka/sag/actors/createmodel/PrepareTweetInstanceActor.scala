@@ -11,7 +11,7 @@ class PrepareTweetInstanceActor extends Actor {
   override def receive: Receive = {
     case PrepareTweetInstance(text, att) =>
       val instance = denseInstanceBuilder.buildDenseInstance(text, att)
-      val message = instance map (TweetInstanceCreated(_)) getOrElse CannotCreateTweetInstance
+      val message = instance map TweetInstanceCreated getOrElse CannotCreateTweetInstance
       sender ! message
   }
 }

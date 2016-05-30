@@ -11,8 +11,11 @@ import weka.filters.Filter
 
 import pl.edu.pw.elka.sag.model.TweetConversions.doubleToSentiment
 
+/**
+  * @deprecated Aktor odpowiedzialny za danego kandydata sklasyfikuje wszystkie tweety
+  */
 @Deprecated
-class TweetClassificationActor extends Actor{
+class TweetClassificationActor extends Actor {
 
   val weka = new Weka()
   val dib = new DenseInstanceBuilder()
@@ -27,7 +30,7 @@ class TweetClassificationActor extends Actor{
 
       val responseMessage = instance.map { instance =>
         val result = classifyTweet(filter, classifier, instances, instance)
-//        println(s"Wynik: $result dla $tweet")
+        //        println(s"Wynik: $result dla $tweet")
         val response = TweetClassificationResponse(result)
         TweetClassified(response)
       } getOrElse CannotClassifyTweet

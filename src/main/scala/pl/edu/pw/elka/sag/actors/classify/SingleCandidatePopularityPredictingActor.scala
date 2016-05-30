@@ -18,8 +18,7 @@ class SingleCandidatePopularityPredictingActor extends Actor{
   val dib = new DenseInstanceBuilder()
 
   override def receive: Receive = {
-    case PredictCandidate(model, file) =>
-      predicateCandidate(makeCopy(model), file)
+    case PredictCandidate(model, file) => predicateCandidate(makeCopy(model), file)
   }
 
   private def predicateCandidate(model: AlgorithmModel, file: FileName): Unit = {
@@ -28,7 +27,7 @@ class SingleCandidatePopularityPredictingActor extends Actor{
     tweets.close()
   }
 
-  def classifyTweets(oldModel: AlgorithmModel, tweets: BufferedSource): CandidatePopularity = {
+  private def classifyTweets(oldModel: AlgorithmModel, tweets: BufferedSource): CandidatePopularity = {
     val model = makeCopy(oldModel)
     val filter: Filter = model.filter
     val classifier: Classifier = model.classifier
@@ -37,38 +36,38 @@ class SingleCandidatePopularityPredictingActor extends Actor{
     classifyPreparedTweets(classifier, preparedTweets)
   }
 
-  def classifyPreparedTweets(classifier: Classifier, preparedTweets: Instances): CandidatePopularity = {
-    val candidateVoter: CandidateVoter = new CandidateVoter
-
-    each(preparedTweets)
-      .map(classifier.classifyInstance(_))
-      .foreach(candidateVoter.vote(_))
-
-    candidateVoter.printStats
-    candidateVoter.getResult
-  }
-
-  def prepareTweetToClassification(tweets: BufferedSource, filter: Filter): Instances = {
-    val instances = weka.prepareInstances()
-    populateInstacesWithTweets(tweets, instances)
-    val filteredInstances: Instances = weka.filter(instances, filter)
-    filteredInstances
-  }
-
   private def makeCopy(model: AlgorithmModel): AlgorithmModel = {
     val classifierCopy: Classifier = AbstractClassifier.makeCopy(model.classifier)
     val filterCopy: Filter = Filter.makeCopy(model.filter)
     model.copy(classifier = classifierCopy, filter = filterCopy)
   }
 
-  def populateInstacesWithTweets(tweets: BufferedSource, instances: Instances): Unit = {
+  private def prepareTweetToClassification(tweets: BufferedSource, filter: Filter): Instances = {
+    val instances = weka.prepareInstances()
+    populateInstancesWithTweets(tweets, instances)
+    val filteredInstances: Instances = weka.filter(instances, filter)
+    filteredInstances
+  }
+
+  private def classifyPreparedTweets(classifier: Classifier, preparedTweets: Instances): CandidatePopularity = {
+    val candidateVoter: CandidateVoter = new CandidateVoter
+
+    each(preparedTweets)
+      .map(classifier.classifyInstance)
+      .foreach(candidateVoter.vote(_))
+
+    candidateVoter.printStats
+    candidateVoter.getResult
+  }
+
+  private def populateInstancesWithTweets(tweets: BufferedSource, instances: Instances): Unit = {
     tweets.getLines().map(tweet =>
       dib.buildDenseInstance(tweet, instances.attribute(0))
     ).flatten.foreach(instances.add(_))
   }
 
-  def each(filteredInstances: Instances): IndexedSeq[Instance] = {
+  private def each(filteredInstances: Instances): IndexedSeq[Instance] = {
     (0 until filteredInstances.size())
-      .map(filteredInstances.get(_))
+      .map(filteredInstances.get)
   }
 }
