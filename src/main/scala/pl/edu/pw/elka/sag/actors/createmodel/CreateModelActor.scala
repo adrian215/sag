@@ -13,11 +13,15 @@ import weka.core.DenseInstance
 import scala.io.BufferedSource
 
 object CreateModelActor {
-  def props(modelCreated: ModelCreated): Props = Props(new CreateModelActor(modelCreated))
+  def props(classificationType: ClsType, modelCreated: ModelCreated): Props =
+    Props(new CreateModelActor(classificationType, modelCreated))
 }
 
-class CreateModelActor(modelCreated: ModelCreated) extends MasterActor {
-  override val workers = context.actorOf(RoundRobinPool(ApplicationConfig.actorSize).props(Props[PrepareTweetInstanceActor]))
+class CreateModelActor(classificationType: ClsType, modelCreated: ModelCreated) extends MasterActor {
+  override val workers =
+    context
+      .actorOf(RoundRobinPool(ApplicationConfig.actorSize)
+        .props(Props[PrepareTweetInstanceActor]))
 
   val weka = new Weka()
   val instances = weka.prepareInstances()
@@ -53,7 +57,7 @@ class CreateModelActor(modelCreated: ModelCreated) extends MasterActor {
     println("Main actor finished")
     val filter = weka.createFilter(instances)
     val filteredData = weka.filter(instances, filter)
-    val model: Classifier = weka.buildModel(filteredData, ClsType.SVM)
+    val model: Classifier = weka.buildModel(filteredData, classificationType)
     modelCreated.apply(AlgorithmModel(model, filter))
   }
 }
