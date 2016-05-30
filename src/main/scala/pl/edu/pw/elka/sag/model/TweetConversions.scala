@@ -1,4 +1,4 @@
-package pl.edu.pw.elka.sag.tweets
+package pl.edu.pw.elka.sag.model
 
 object TweetConversions {
 

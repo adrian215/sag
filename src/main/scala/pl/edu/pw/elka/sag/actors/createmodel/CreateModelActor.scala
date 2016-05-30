@@ -4,8 +4,8 @@ import akka.actor.Props
 import akka.routing.RoundRobinPool
 import pl.edu.pw.elka.sag.actors.MasterActor
 import pl.edu.pw.elka.sag.actors.createmodel.Messages.{BuildModel, PrepareTweetInstance, TweetInstanceCreated}
-import pl.edu.pw.elka.sag.classification.Model
 import pl.edu.pw.elka.sag.config.{ApplicationConfig, WekaConfig}
+import pl.edu.pw.elka.sag.model.AlgorithmModel
 import pl.edu.pw.elka.sag.weka.{ClsType, Weka}
 import weka.classifiers.Classifier
 
@@ -50,6 +50,6 @@ class CreateModelActor(modelCreated: ModelCreated) extends MasterActor {
     val filter = weka.createFilter(instances)
     val filteredData = weka.filter(instances, filter)
     val model: Classifier = weka.buildModel(filteredData, ClsType.SVM)
-    modelCreated.apply(Model(model, filter))
+    modelCreated.apply(AlgorithmModel(model, filter))
   }
 }

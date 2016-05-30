@@ -2,14 +2,14 @@ package pl.edu.pw.elka.sag.actors.classify
 
 import akka.actor.Actor
 import pl.edu.pw.elka.sag.actors.classify.Messages.{TweetClassified, CannotClassifyTweet, ClassifyTweet}
-import pl.edu.pw.elka.sag.classification.{TweetClassificationResponse, DenseInstanceBuilder}
-import pl.edu.pw.elka.sag.tweets.Sentiment
+import pl.edu.pw.elka.sag.utils.DenseInstanceBuilder
+import pl.edu.pw.elka.sag.model.{TweetClassificationResponse, Sentiment}
 import pl.edu.pw.elka.sag.weka.Weka
 import weka.classifiers.Classifier
 import weka.core.{Instances, DenseInstance}
 import weka.filters.Filter
 
-import pl.edu.pw.elka.sag.tweets.TweetConversions.doubleToSentiment
+import pl.edu.pw.elka.sag.model.TweetConversions.doubleToSentiment
 
 @Deprecated
 class TweetClassificationActor extends Actor{

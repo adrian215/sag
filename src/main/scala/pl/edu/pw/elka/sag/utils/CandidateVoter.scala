@@ -1,6 +1,7 @@
-package pl.edu.pw.elka.sag.actors.classify
+package pl.edu.pw.elka.sag.utils
 
-import pl.edu.pw.elka.sag.tweets.{NEGATIVE, POSITIVE, Sentiment}
+import pl.edu.pw.elka.sag.actors.classify._
+import pl.edu.pw.elka.sag.model.{NEGATIVE, POSITIVE, Sentiment}
 
 class CandidateVoter {
   private var allVotes, positiveVotes: Votes = 0
@@ -22,5 +23,10 @@ class CandidateVoter {
 
   def getResult: CandidatePopularity = {
     positiveVotes.toDouble / allVotes.toDouble
+  }
+
+  def printStats: Unit ={
+    println(s"\nPoparcie na podstawie tweetow: ${getResult}\n" +
+      s"pozytywnych: $positiveVotes, negatywnych: ${allVotes - positiveVotes}, wszystkich: $allVotes")
   }
 }
