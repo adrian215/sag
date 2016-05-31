@@ -44,7 +44,8 @@ object Configuration {
       svmFilterFile = file.getString("svmFilterFile"),
       naiveBayesFilterFile = file.getString("naiveBayesFilterFile"),
       wordsToKeep = file.getInt("wordsToKeep"),
-      trainingSetSize = file.getDouble("trainingSetSize").toFloat
+      trainingSetSize = file.getDouble("trainingSetSize").toFloat,
+      costSVM = file.getDouble("costSVM")
     )
   }
 
@@ -70,5 +71,6 @@ case class WekaConfig(
                        val svmFilterFile: String,
                        val naiveBayesFilterFile: String,
                        val wordsToKeep: Int,
-                       val trainingSetSize: Float
+                       val trainingSetSize: Float,
+                       val costSVM: Double
                      )
