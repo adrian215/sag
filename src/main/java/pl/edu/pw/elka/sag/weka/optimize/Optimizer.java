@@ -6,6 +6,7 @@ import weka.core.setupgenerator.AbstractParameter;
 import weka.core.setupgenerator.MathParameter;
 
 import static pl.edu.pw.elka.sag.weka.optimize.OptimizationParameterBuilder.optimizeProperty;
+import static weka.classifiers.meta.multisearch.DefaultEvaluationMetrics.EVALUATION_ACC;
 import static weka.classifiers.meta.multisearch.DefaultEvaluationMetrics.EVALUATION_AUC;
 
 public class Optimizer {
@@ -18,15 +19,23 @@ public class Optimizer {
 
         MathParameter cost =
                 optimizeProperty("cost")
-                .from(-5)
-                .to(5)
-                .withStep(1)
-                .get();
+                        .from(-5)
+                        .to(5)
+                        .withStep(1)
+                        .get();
 
-        AbstractParameter[] optimizationParams = {cost};
+        MathParameter gamma =
+                optimizeProperty("gamma")
+                        .from(-11)
+                        .to(-3)
+                        .withStep(1)
+                        .withBase(2)
+                        .get();
+
+        AbstractParameter[] optimizationParams = {cost, gamma};
 
         return optimizeClassifier(classifier)
-                .selectionStrategy(EVALUATION_AUC)
+                .selectionStrategy(EVALUATION_ACC)
                 .withParams(optimizationParams)
                 .formData(data);
 

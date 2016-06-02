@@ -45,6 +45,11 @@ public class OptimizationParameterBuilder {
         return this;
     }
 
+    public OptimizationParameterBuilder withBase(int base) {
+        params.setBase(base);
+        return this;
+    }
+
     public OptimizationParameterBuilder withExpression(String expression) {
         params.setExpression(expression);
         return this;
