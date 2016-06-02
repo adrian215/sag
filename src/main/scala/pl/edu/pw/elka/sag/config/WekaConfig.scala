@@ -40,12 +40,22 @@ object Configuration {
       classificationFiles = classificationFiles,
       delimiter = file.getString("delimiter"),
       svmModelFile = file.getString("svmModelFile"),
+      svmnlModelFile = file.getString("svmnlModelFile"),
       naiveBayesModelFile = file.getString("naiveBayesModelFile"),
       svmFilterFile = file.getString("svmFilterFile"),
+      svmnlFilterFile = file.getString("svmFilterFile"),
       naiveBayesFilterFile = file.getString("naiveBayesFilterFile"),
       wordsToKeep = file.getInt("wordsToKeep"),
       trainingSetSize = file.getDouble("trainingSetSize").toFloat,
-      costSVM = file.getDouble("costSVM")
+      costSVM = file.getDouble("costSVM"),
+      start = file.getInt("start"),
+      end = file.getInt("end"),
+      step = file.getInt("step"),
+      base = file.getInt("base"),
+      startNl = file.getInt("startNl"),
+      endNl = file.getInt("endNl"),
+      stepNl = file.getInt("stepNl"),
+      baseNl = file.getInt("baseNl")
     )
   }
 
@@ -67,10 +77,22 @@ case class WekaConfig(
                        val classificationFiles: Seq[(String, String)],
                        val delimiter: String,
                        val svmModelFile: String,
+                       val svmnlModelFile: String,
                        val naiveBayesModelFile: String,
                        val svmFilterFile: String,
+                       val svmnlFilterFile: String,
                        val naiveBayesFilterFile: String,
                        val wordsToKeep: Int,
                        val trainingSetSize: Float,
-                       val costSVM: Double
+                       val costSVM: Double,
+
+                       // optimize parameter
+                       val start: Int,
+                       val end: Int,
+                       val step: Int,
+                       val base: Int,
+                       val startNl: Int,
+                       val endNl: Int,
+                       val stepNl: Int,
+                       val baseNl: Int
                      )

@@ -4,6 +4,7 @@ import pl.edu.pw.elka.sag.config.Configuration;
 import pl.edu.pw.elka.sag.config.WekaConfig;
 import pl.edu.pw.elka.sag.weka.optimize.Optimizer;
 import weka.classifiers.Classifier;
+import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.LibSVM;
 import weka.core.Attribute;
@@ -57,21 +58,46 @@ public class Weka {
         Classifier classifier = null;
         switch (clsType) {
             case SVM:
-                classifier = getSVM();
+                classifier = optimizer.optimizeClassifier(data, getSVM(), clsType);
+                break;
+            case SVMNL:
+                classifier = optimizer.optimizeClassifier(data, getSVMNL(), clsType);
                 break;
             case NB:
                 classifier = getNaiveBayes();
                 break;
         }
 
-        return optimizer.optimizeClassifier(data, classifier);
+        return trainModel(data, classifier);
+    }
+
+    private Classifier trainModel(Instances data, Classifier classifier) throws Exception {
+        int trainingSize = Math.round(wekaConfig.trainingSetSize() * data.size());
+        int testSize = data.size() - trainingSize;
+        Instances training = new Instances(data, 0, trainingSize);
+        Instances test = new Instances(data, trainingSize, testSize);
+
+        System.out.println(training.toSummaryString());
+        System.out.println(test.toSummaryString());
+
+        classifier.buildClassifier(training);
+        Evaluation eval = new Evaluation(data);
+        eval.evaluateModel(classifier, test);
+        System.out.println(eval.toSummaryString(true));
+        return  classifier;
     }
 
     private Classifier getSVM() {
         LibSVM classifier = new LibSVM();
         classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_C_SVC, LibSVM.TAGS_SVMTYPE));
+        classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE));
+        return classifier;
+    }
+
+    private Classifier getSVMNL() {
+        LibSVM classifier = new LibSVM();
+        classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_C_SVC, LibSVM.TAGS_SVMTYPE));
         classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_RBF, LibSVM.TAGS_KERNELTYPE));
-//        classifier.setCost(wekaConfig.costSVM());
         return classifier;
     }
 

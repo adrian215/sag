@@ -57,6 +57,9 @@ public class WekaFileHandler {
             case SVM:
                 path = wekaConfig.svmModelFile();
                 break;
+            case SVMNL:
+                path= wekaConfig.svmnlModelFile();
+                break;
             case NB:
                 path = wekaConfig.naiveBayesModelFile();
                 break;
@@ -70,6 +73,9 @@ public class WekaFileHandler {
         switch (clsType) {
             case SVM:
                 path = wekaConfig.svmFilterFile();
+                break;
+            case SVMNL:
+                path = wekaConfig.svmnlFilterFile();
                 break;
             case NB:
                 path = wekaConfig.naiveBayesFilterFile();

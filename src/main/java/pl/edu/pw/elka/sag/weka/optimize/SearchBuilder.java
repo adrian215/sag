@@ -46,7 +46,6 @@ class SearchBuilder {
     public Classifier formData(Instances data) throws Exception {
         multiSearch.buildClassifier(data);
         Classifier bestClassifier = multiSearch.getBestClassifier();
-        bestClassifier.buildClassifier(data);
 
         System.out.println("Zakończono optymalizacje modelu");
         System.out.println("Model: " + Utils.toCommandLine(multiSearch.getBestClassifier()));
