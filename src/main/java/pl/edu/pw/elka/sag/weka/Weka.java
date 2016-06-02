@@ -70,7 +70,7 @@ public class Weka {
     private Classifier getSVM() {
         LibSVM classifier = new LibSVM();
         classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_C_SVC, LibSVM.TAGS_SVMTYPE));
-        classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE));
+        classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_RBF, LibSVM.TAGS_KERNELTYPE));
 //        classifier.setCost(wekaConfig.costSVM());
         return classifier;
     }

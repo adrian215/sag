@@ -17,7 +17,7 @@ class SearchBuilder {
         multiSearch.setClassifier(classifier);
     }
 
-    public static SearchBuilder createFromClassifier(Classifier classifier) {
+    public static SearchBuilder createSearchFromClassifier(Classifier classifier) {
         return new SearchBuilder(classifier);
     }
 
@@ -35,6 +35,11 @@ class SearchBuilder {
 
     public SearchBuilder withParams(MathParameter params) {
         multiSearch.setSearchParameters(new AbstractParameter[] {params});
+        return this;
+    }
+
+    public SearchBuilder withParams(AbstractParameter[] params) {
+        multiSearch.setSearchParameters(params);
         return this;
     }
 
