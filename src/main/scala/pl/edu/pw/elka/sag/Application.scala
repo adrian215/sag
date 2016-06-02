@@ -16,11 +16,8 @@ class Application {
   val system: ActorSystem = ActorSystem("Example")
 
   def start(): Unit = {
-    //    println("Config file path?")
-    //    val configPath = StdIn.readLine()
-    //    println("Config file path?")
-    //    val configPath = StdIn.readLine()
-    val configPath = "E:\\sag\\sag\\dane\\app.conf"
+    println("Config file path?")
+    val configPath = StdIn.readLine()
     val config = Configuration.setConfigPath(configPath)
     val wekaConfig: WekaConfig = Configuration.getConfig()
 
