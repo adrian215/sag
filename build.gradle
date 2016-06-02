@@ -21,7 +21,10 @@ dependencies {
     compile group: 'nz.ac.waikato.cms.weka', name: 'LibSVM', version: '1.0.8'
     compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.8.0'
     compile group: 'com.github.fracpete', name: 'snowball-stemmers-weka-package', version: '1.0.0'
-
+    //Weka Multisearch
+    compile('com.github.fracpete:multisearch-weka-package:2016.5.31') {
+        exclude group: 'nz.ac.waikato.cms.weka', module: 'weka-dev'
+    }
 
     //akka
     compile 'com.typesafe.akka:akka-actor_2.11:2.4.6'

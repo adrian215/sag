@@ -2,8 +2,8 @@ package pl.edu.pw.elka.sag.weka;
 
 import pl.edu.pw.elka.sag.config.Configuration;
 import pl.edu.pw.elka.sag.config.WekaConfig;
+import pl.edu.pw.elka.sag.weka.optimize.Optimizer;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.LibSVM;
 import weka.core.Attribute;
@@ -16,13 +16,11 @@ import weka.filters.unsupervised.attribute.StringToWordVector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
-/**
- * Created by Miko on 27.05.2016.
- */
 public class Weka {
+
     private WekaConfig wekaConfig = Configuration.getConfig();
+    private Optimizer optimizer = Optimizer.create();
 
     public Weka() {
 //        stopwordsHandler = new MyStopWordHandler();
@@ -66,26 +64,14 @@ public class Weka {
                 break;
         }
 
-        int trainingSize = Math.round(wekaConfig.trainingSetSize() * data.size());
-        int testSize = data.size() - trainingSize;
-        Instances training = new Instances(data, 0, trainingSize);
-        Instances test = new Instances(data, trainingSize, testSize);
-
-        System.out.println(training.toSummaryString());
-        System.out.println(test.toSummaryString());
-
-        classifier.buildClassifier(training);
-        Evaluation eval = new Evaluation(data);
-        eval.evaluateModel(classifier, test);
-        System.out.println(eval.toSummaryString(true));
-        return classifier;
+        return optimizer.optimizeClassifier(data, classifier);
     }
 
     private Classifier getSVM() {
         LibSVM classifier = new LibSVM();
         classifier.setSVMType(new SelectedTag(LibSVM.SVMTYPE_C_SVC, LibSVM.TAGS_SVMTYPE));
         classifier.setKernelType(new SelectedTag(LibSVM.KERNELTYPE_LINEAR, LibSVM.TAGS_KERNELTYPE));
-        classifier.setCost(wekaConfig.costSVM());
+//        classifier.setCost(wekaConfig.costSVM());
         return classifier;
     }
 
